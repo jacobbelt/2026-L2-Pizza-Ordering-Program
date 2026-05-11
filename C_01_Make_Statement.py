@@ -1,5 +1,5 @@
 # Functions go here
-def make_statment(statement, deocration):
+def make_statement(statement, deocration):
     """Empasises headings by adding decartion
     at the start and end"""
 
