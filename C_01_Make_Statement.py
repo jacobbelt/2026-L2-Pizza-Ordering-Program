@@ -6,4 +6,4 @@ def make_statement(statement, deocration):
     print(f"{deocration * 3} {statement} {deocration * 3}")
 
 # Main Routine goes here
-make_statment("Programming is Fun!", "👍")
+make_statement("Programming is Fun!", "👍")

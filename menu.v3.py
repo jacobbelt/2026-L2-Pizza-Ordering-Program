@@ -1,0 +1,210 @@
+import pandas
+
+
+# Functions go here
+def make_statement(statement, decoration):
+    """Emphasises headings by adding decoration at the start and end"""
+    print(f"{decoration * 3} {statement} {decoration * 3}")
+
+def number_check(question):
+    """Checks that valid integers are the right length"""
+    while True:
+        try:
+            value = input(question).strip()
+            if len(value) != 9 or not value.isdigit():
+                print("Please enter a valid 9-digit phone number")
+            else:
+                return value
+        except ValueError:
+            print("Please enter a valid 9-digit phone number")
+
+
+
+def string_check(question, valid_answers=('yes', 'no'), num_letters=1):
+    """Checks that users enter the full word or the first n letters"""
+
+    while True:
+        response = input(question).lower()
+
+        for item in valid_answers:
+
+            # check if the response is the entire word
+            if response == item:
+                return item
+
+            # check if it's the first n letters
+            elif response == item[:num_letters]:
+                return item
+
+        print(f"Please choose an option from {valid_answers}")
+
+
+def int_check(question, max_value=5):
+    """Checks users enter an integer between 1 and max_value"""
+
+    error = f"Please enter a valid integer between 1 and {max_value}"
+
+    while True:
+        try:
+            response = int(input(question))
+
+            if 1 <= response <= max_value:
+                return response
+            else:
+                print(error)
+
+        except ValueError:
+            print(error)
+
+def not_blank(question):
+    """Checks that a user response is not blank"""
+
+    while True:
+        response = input(question)
+
+        if response != "":
+            return response
+
+        print("Sorry, this can't be blank. Please try again.\n")
+
+
+def instructions():
+    make_statement("Instructions", "ℹ️")
+
+    print("""
+Welcome to Luigi's Pizza!
+
+1. View the menu.
+2. Choose a pizza.
+3. Choose how many pizzas you want (up to 5 total).
+4. Add more pizzas if you like, until you reach 5.
+5. See your final order and total.
+""")
+
+
+# Menu data
+menu = [
+    'cheese',
+    'pepperoni',
+    'meat-lovers',
+    'veggie',
+    'white',
+    'cheesy garlic',
+    'ham and cheese',
+    'hawaiian',
+    'buffalo chicken',
+    'beef and onion'
+]
+
+price = [5, 7, 12, 7, 8, 6, 8, 9, 13, 9]
+
+pizza_menu_dict = {
+    "Pizza": menu,
+    "Price ($)": price
+}
+order_type = ["delivery", "pickup"]
+menu_frame = pandas.DataFrame(pizza_menu_dict)
+
+# Create a dictionary for easy price lookup
+price_dict = dict(zip(menu, price))
+
+# Main routine
+make_statement("Luigi's Pizza", "🍕")
+
+print()
+want_instructions = string_check(
+    "Do you want to see the instructions? "
+)
+
+if want_instructions == "yes":
+    instructions()
+
+    phone_number = number_check("What is your phone number? ")
+
+
+delivery_pickup = string_check("Would you like to do delivery or pickup? ", order_type)
+if delivery_pickup == "delivery":
+    while True:
+        address = input("Please enter your address ")
+
+        if address.strip() != "":
+            break
+        print("Invalid address Please try again.")
+    print(f"Your address is {address}")
+    print(f"Your phone number is {phone_number}")
+if delivery_pickup == "pickup":
+    name = not_blank("What is your name? ")
+    print(f"your phone number is {phone_number} ")
+    print("You picked pickup")
+    print(f"Your name is {name}")
+
+print()
+read_menu = string_check(
+    "Would you like to see the menu? "
+)
+
+if read_menu == "yes":
+    print()
+    print(menu_frame)
+
+# Cart stores all orders
+cart = []
+total_cost = 0
+MAX_PIZZAS = 5
+pizzas_remaining = MAX_PIZZAS
+
+print(f"\nYou can order a maximum of {MAX_PIZZAS} pizzas in total.")
+
+while pizzas_remaining > 0:
+
+    print()
+    pizza_choice = string_check(
+        "What pizza would you like? ",
+        menu
+    )
+    print(f"You have {pizzas_remaining} pizza(s) left that you can order")
+    amount = int_check(
+        f"How many {pizza_choice} pizzas would you like? ",
+        pizzas_remaining
+    )
+
+    cost = price_dict[pizza_choice] * amount
+    total_cost += cost
+    pizzas_remaining -= amount
+
+    cart.append([pizza_choice, amount, cost])
+
+    print(
+        f"You ordered {amount} {pizza_choice} pizza(s) "
+        f"for ${cost}"
+    )
+
+    if pizzas_remaining == 0:
+        print(f"\nYou've reached the {MAX_PIZZAS} pizza limit.")
+        break
+
+    more_pizza = string_check(
+        "Would you like to order another pizza? "
+    )
+
+    if more_pizza == "no":
+        break
+
+# Print final order
+make_statement("Your Order", "🛒")
+
+for pizza, amount, cost in cart:
+    print(f"{amount} x {pizza} pizza = ${cost}")
+print(f"Your phone number is {phone_number}")
+if delivery_pickup == "delivery":
+    print(f"Your address is {address}")
+print()
+print(f"Total Cost: ${total_cost}")
+
+
+cancel_order = string_check("Is this your correct order? ")
+
+if cancel_order == "yes":
+    make_statement("Thank You For Ordering at Lugi's your pizza will be ready soon", "🍕")
+if cancel_order == "no":
+        print("Thank you bye")
