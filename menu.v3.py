@@ -6,6 +6,7 @@ def make_statement(statement, decoration):
     """Emphasises headings by adding decoration at the start and end"""
     print(f"{decoration * 3} {statement} {decoration * 3}")
 
+
 def number_check(question):
     """Checks that valid integers are the right length"""
     while True:
@@ -17,7 +18,6 @@ def number_check(question):
                 return value
         except ValueError:
             print("Please enter a valid 9-digit phone number")
-
 
 
 def string_check(question, valid_answers=('yes', 'no'), num_letters=1):
@@ -56,6 +56,7 @@ def int_check(question, max_value=5):
         except ValueError:
             print(error)
 
+
 def not_blank(question):
     """Checks that a user response is not blank"""
 
@@ -81,6 +82,46 @@ Welcome to Luigi's Pizza!
 5. See your final order and total.
 """)
 
+
+def run_order(cart, total_cost, pizzas_remaining, max_pizzas):
+    """Runs the pizza ordering loop and returns updated cart, total, and pizzas remaining"""
+
+    while pizzas_remaining > 0:
+
+        print()
+        pizza_choice = string_check(
+            "What pizza would you like? ",
+            menu
+        )
+        print(f"You have {pizzas_remaining} pizza(s) left that you can order")
+        amount = int_check(
+            f"How many {pizza_choice} pizzas would you like? ",
+            pizzas_remaining
+        )
+
+        cost = price_dict[pizza_choice] * amount
+        total_cost += cost
+        pizzas_remaining -= amount
+
+        cart.append([pizza_choice, amount, cost])
+
+        print(
+            f"You ordered {amount} {pizza_choice} pizza(s) "
+            f"for ${cost}"
+        )
+
+        if pizzas_remaining == 0:
+            print(f"\nYou've reached the {max_pizzas} pizza limit.")
+            break
+
+        more_pizza = string_check(
+            "Would you like to order another pizza? "
+        )
+
+        if more_pizza == "no":
+            break
+
+    return cart, total_cost, pizzas_remaining
 
 # Menu data
 menu = [
@@ -108,103 +149,84 @@ menu_frame = pandas.DataFrame(pizza_menu_dict)
 # Create a dictionary for easy price lookup
 price_dict = dict(zip(menu, price))
 
+
+
+
 # Main routine
 make_statement("Luigi's Pizza", "🍕")
 
-print()
-want_instructions = string_check(
-    "Do you want to see the instructions? "
-)
+while True:
+    print()
+    want_instructions = string_check(
+        "Do you want to see the instructions? "
+    )
 
-if want_instructions == "yes":
-    instructions()
+    if want_instructions == "yes":
+        instructions()
 
     phone_number = number_check("What is your phone number? ")
 
+    delivery_pickup = string_check("Would you like to do delivery or pickup? ", order_type)
+    if delivery_pickup == "delivery":
+        while True:
+            address = input("Please enter your address ")
 
-delivery_pickup = string_check("Would you like to do delivery or pickup? ", order_type)
-if delivery_pickup == "delivery":
-    while True:
-        address = input("Please enter your address ")
+            if address.strip() != "":
+                break
+            print("Invalid address. Please try again.")
+        print(f"Your address is {address}")
+        print(f"Your phone number is {phone_number}")
+    if delivery_pickup == "pickup":
+        name = not_blank("What is your name? ")
+        print(f"Your phone number is {phone_number}")
+        print("You picked pickup")
+        print(f"Your name is {name}")
 
-        if address.strip() != "":
-            break
-        print("Invalid address Please try again.")
-    print(f"Your address is {address}")
+    print()
+    read_menu = string_check(
+        "Would you like to see the menu? "
+    )
+
+    if read_menu == "yes":
+        print()
+        print(menu_frame)
+
+    # Cart stores all orders
+    cart = []
+    total_cost = 0
+    MAX_PIZZAS = 5
+    pizzas_remaining = MAX_PIZZAS
+
+    print(f"\nYou can order a maximum of {MAX_PIZZAS} pizzas in total.")
+
+    cart, total_cost, pizzas_remaining = run_order(cart, total_cost, pizzas_remaining, MAX_PIZZAS)
+
+    # Print final order
+    make_statement("Your Order", "🛒")
+
+    for pizza, amount, cost in cart:
+        print(f"{amount} x {pizza} pizza = ${cost}")
     print(f"Your phone number is {phone_number}")
-if delivery_pickup == "pickup":
-    name = not_blank("What is your name? ")
-    print(f"your phone number is {phone_number} ")
-    print("You picked pickup")
-    print(f"Your name is {name}")
+    if delivery_pickup == "delivery":
+        print(f"Your address is {address}")
+    if delivery_pickup == "pickup":
+        print(f"Your name is {name}")
+    print(f"Total Cost: ${total_cost}")
 
-print()
-read_menu = string_check(
-    "Would you like to see the menu? "
-)
+    correct_order = string_check("Is this your correct order? ")
 
-if read_menu == "yes":
-    print()
-    print(menu_frame)
+    if correct_order == "no":
+        # correct_order == "no" -> ask if they want to redo the order
+        redo = string_check("Do you want to redo your order? ")
+        if redo == "no":
+            # They don't want the order they built, and don't want to redo it,
+            # so treat it as cancelled and end the program.
+            make_statement("Thank you for ordering at Luigi's!", "🍕")
+            break
 
-# Cart stores all orders
-cart = []
-total_cost = 0
-MAX_PIZZAS = 5
-pizzas_remaining = MAX_PIZZAS
+        continue
 
-print(f"\nYou can order a maximum of {MAX_PIZZAS} pizzas in total.")
-
-while pizzas_remaining > 0:
-
-    print()
-    pizza_choice = string_check(
-        "What pizza would you like? ",
-        menu
-    )
-    print(f"You have {pizzas_remaining} pizza(s) left that you can order")
-    amount = int_check(
-        f"How many {pizza_choice} pizzas would you like? ",
-        pizzas_remaining
-    )
-
-    cost = price_dict[pizza_choice] * amount
-    total_cost += cost
-    pizzas_remaining -= amount
-
-    cart.append([pizza_choice, amount, cost])
-
-    print(
-        f"You ordered {amount} {pizza_choice} pizza(s) "
-        f"for ${cost}"
-    )
-
-    if pizzas_remaining == 0:
-        print(f"\nYou've reached the {MAX_PIZZAS} pizza limit.")
+    add_more = string_check("Do you want to place another order? ")
+    if add_more == "no":
+        make_statement("Thank you for ordering at Luigi's!", "🍕")
         break
-
-    more_pizza = string_check(
-        "Would you like to order another pizza? "
-    )
-
-    if more_pizza == "no":
-        break
-
-# Print final order
-make_statement("Your Order", "🛒")
-
-for pizza, amount, cost in cart:
-    print(f"{amount} x {pizza} pizza = ${cost}")
-print(f"Your phone number is {phone_number}")
-if delivery_pickup == "delivery":
-    print(f"Your address is {address}")
-print()
-print(f"Total Cost: ${total_cost}")
-
-
-cancel_order = string_check("Is this your correct order? ")
-
-if cancel_order == "yes":
-    make_statement("Thank You For Ordering at Lugi's your pizza will be ready soon", "🍕")
-if cancel_order == "no":
-        print("Thank you bye")
