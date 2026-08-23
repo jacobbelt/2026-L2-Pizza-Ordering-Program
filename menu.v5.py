@@ -226,6 +226,9 @@ sides_frame.index = sides_frame.index + 1
 # Create a dictionary for easy price lookup
 price_sides_dict = dict(zip(sides, price_sides))
 
+# Delivery fee
+DELIVERY_FEE = 5
+
 
 # Main routine
 make_statement("Luigi's Pizza", "🍕")
@@ -283,6 +286,10 @@ while True:
     print()
     sides_cart, total_cost, sides_remaining = run_sides(sides_cart, total_cost, sides_remaining, MAX_SIDES)
 
+    # Add delivery fee if applicable
+    if delivery_pickup == "delivery":
+        total_cost += DELIVERY_FEE
+
     # Print final order
     make_statement(F"{name}'s order", "🛒")
 
@@ -291,6 +298,9 @@ while True:
 
     for side, amount, cost in sides_cart:
         print(f"{amount} x {side} = ${cost}")
+
+    if delivery_pickup == "delivery":
+        print(f"Delivery fee = ${DELIVERY_FEE}")
 
     print(f"Your phone number is {phone_number}")
     if delivery_pickup == "delivery":
